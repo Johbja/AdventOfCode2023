@@ -1,15 +1,13 @@
 ﻿using AdventOfCode2023.Attributes;
-using AdventOfCode2023.Days;
 using AdventOfCode2023.Intefaces;
 using AdventOfCode2023.Services;
-using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
 namespace AdventOfCode2023;
 
 public class Program
 {
-    private static Dictionary<int, Type> _solutionRepository;
+    private static Dictionary<int, Type> _solutionRepository = new();
 
     static void Main(string[] args)
     {
