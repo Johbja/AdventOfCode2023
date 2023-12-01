@@ -1,20 +1,27 @@
-﻿using AdventOfCode2023.Intefaces;
+﻿using AdventOfCode2023.Attributes;
+using AdventOfCode2023.Intefaces;
+using AdventOfCode2023.Services;
 
 namespace AdventOfCode2023.Days;
+
+[DayInfo("Name", "Day 2")]
 internal class Day02 : ISolution
 {
-    public void LoadInput()
+    private readonly string[] _input;
+
+    public Day02(LoadInputService inputService)
     {
-        throw new NotImplementedException();
+        _input = inputService.GetInputAsLines(nameof(Day02));
     }
 
     public void SolvePartOne()
     {
-        throw new NotImplementedException();
+        Console.WriteLine("p1");
     }
 
     public void SolvePartTwo()
     {
-        throw new NotImplementedException();
+        Console.WriteLine("p2");
     }
+
 }

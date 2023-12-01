@@ -8,14 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Inputs\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Inputs\Day02.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Inputs\Day01.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
