@@ -1,13 +1,7 @@
 ﻿using AdventOfCode2023.Attributes;
 using AdventOfCode2023.Intefaces;
 using AdventOfCode2023.Services;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics.Metrics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AdventOfCode2023.Days;
 

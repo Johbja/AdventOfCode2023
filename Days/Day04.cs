@@ -1,7 +1,6 @@
 ﻿using AdventOfCode2023.Attributes;
 using AdventOfCode2023.Intefaces;
 using AdventOfCode2023.Services;
-using System.Runtime.InteropServices;
 
 namespace AdventOfCode2023.Days;
 
@@ -44,7 +43,6 @@ public class Day04 : ISolution
 
     public void SolvePartTwo()
     {
-        //var cards = _input.Select(x => x.Split(":")[1].Split("|").Select(x => x.Split(" ", StringSplitOptions.RemoveEmptyEntries).Select(x => int.Parse(x)).ToArray()).ToList()).ToList();
         var cardsTable = _input.Select(x => x.Split(":"))
             .Select
             (
