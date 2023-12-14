@@ -42,7 +42,7 @@ public class Program
             .GetTypes()
             .Where(type => type != null && interfaceType.IsAssignableFrom(type) && type != interfaceType)
             .OrderBy(type => type.Name)
-            .ToDictionary(type => counter++, type => type);
+            .ToDictionary(type => int.Parse(type.Name.Where(x => char.IsDigit(x)).Aggregate("", (a,b) => a + b.ToString())), type => type);
     }
     
     private static ISolution CreateInstanceOfSolution(int day)
