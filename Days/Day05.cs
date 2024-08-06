@@ -25,9 +25,9 @@ public class Day05 : ISolution
         maps = sections.Skip(1).Select(section => section.Split(":"))
             .Select
             (
-                map => 
+                map =>
                 (
-                    mapnName: map[0], 
+                    mapnName: map[0],
                     values: map[1].Split("\r\n", StringSplitOptions.RemoveEmptyEntries)
                         .Select
                         (
@@ -59,25 +59,65 @@ public class Day05 : ISolution
     public void SolvePartTwo()
     {
         var srcPairs = seeds.Chunk(2).ToList();
+        var seedRanges = srcPairs.Select(pair => (start: pair[0], end: pair[0] + pair[1] - 1)).ToArray();
+        var mapRanges = maps.ToDictionary(key => key.Key, value => value.Value.Select(row => (dest: (start: row[0], end: row[0] + row[2] - 1), src: (start: row[1], end: row[1] + row[2] - 1))).ToArray());
 
-        long max = long.MaxValue;
-        foreach(var pair in srcPairs)
+        Console.WriteLine(seedRanges.Select(x => x.end - x.start).Sum());
+
+        long min = long.MaxValue;
+        foreach (var (start, end) in seedRanges)
         {
-            var seeds = LongRange(pair[0], pair[1]).ToArray();
-            var resutl = CalculateMinSeedLocation(seeds);
+            List<(long start, long end)> currentRanges = new()
+            {
+                (start, end)
+            };
 
-            if(resutl < max)
-                max = resutl;
+            foreach (var key in mapRanges.Keys)
+            {
+                foreach (var (dest, src) in mapRanges[key])
+                {
+                    int iterator = currentRanges.Count;
+                    for (int i = 0; i < iterator; i++)
+                    {
+                        if (currentRanges[i].end > src.end)
+                        {
+                            var newRangeStart = Math.Abs(src.end - currentRanges[i].end);
+                            currentRanges.Add((newRangeStart, currentRanges[i].end));
+                            iterator++;
+                            currentRanges[i] = (currentRanges[i].start, src.end);
+                        }
+
+                        if (currentRanges[i].start < src.start)
+                        {
+                            var newRangeEnd = Math.Abs(currentRanges[i].start - src.start);
+                            currentRanges.Add((currentRanges[i].start, newRangeEnd));
+                            iterator++;
+                            currentRanges[i] = (src.start, currentRanges[i].end);
+                        }
+
+                        var rangeOffset = Math.Abs(src.start - currentRanges[i].start);
+                        var mappedStartValue = dest.start + rangeOffset;
+
+                        rangeOffset = Math.Abs(src.start - currentRanges[i].end);
+                        var mappedEndValue = dest.start + rangeOffset;
+
+                        currentRanges[i] = (mappedStartValue, mappedEndValue);
+                    }
+                }
+            }
+
+            var currentMin = currentRanges.Select(x => x.start < x.end ? x.start : x.end).Min();
+            min = currentMin < min ? currentMin : min;
         }
 
-        Console.WriteLine(max);
+        Console.WriteLine(min);
     }
 
     private long CalculateMinSeedLocation(long[] currentSrc)
     {
         foreach (var key in maps.Keys)
         {
-            
+
             long len = currentSrc.Length;
             for (long i = 0; i < len; i++)
             {

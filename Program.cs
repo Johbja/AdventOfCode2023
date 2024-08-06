@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace AdventOfCode2023;
 
-public class Program
+public static class Program
 {
     private static Dictionary<int, Type> _solutionRepository = new();
 
@@ -35,7 +35,6 @@ public class Program
     {
         Assembly currentAssembly = Assembly.GetExecutingAssembly();
 
-        int counter = 1;
         Type interfaceType = typeof(ISolution);
 
         _solutionRepository = currentAssembly
