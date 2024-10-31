@@ -1,6 +1,8 @@
 ﻿using AdventOfCode2023.Attributes;
 using AdventOfCode2023.Intefaces;
 using AdventOfCode2023.Services;
+using System.Collections;
+using System.Collections.Generic;
 using System.Data;
 
 namespace AdventOfCode2023.Days;
@@ -43,75 +45,53 @@ public class Day05 : ISolution
 
     public void SolvePartOne()
     {
-        long result = CalculateMinSeedLocation(seeds);
-        Console.WriteLine(result);
-    }
+        long[] seedsCopy = new long[seeds.Length];
 
-    private IEnumerable<long> LongRange(long start, long count)
-    {
-        long end = start + count;
-        while (end > start)
-        {
-            yield return start++;
-        }
+        Array.Copy(seeds, seedsCopy, seeds.Length);
+
+        long result = CalculateMinSeedLocation(seedsCopy);
+        Console.WriteLine(result);
     }
 
     public void SolvePartTwo()
     {
         var srcPairs = seeds.Chunk(2).ToList();
-        var seedRanges = srcPairs.Select(pair => (start: pair[0], end: pair[0] + pair[1] - 1)).ToArray();
-        var mapRanges = maps.ToDictionary(key => key.Key, value => value.Value.Select(row => (dest: (start: row[0], end: row[0] + row[2] - 1), src: (start: row[1], end: row[1] + row[2] - 1))).ToArray());
-
-        Console.WriteLine(seedRanges.Select(x => x.end - x.start).Sum());
+        var seedRanges = srcPairs.Select(pair => (start: pair[0], end: pair[0] + pair[1])).ToArray();
 
         long min = long.MaxValue;
+
+        List<int> lockObject = new();
+
+        List<Task> threads = new();
+
         foreach (var (start, end) in seedRanges)
         {
-            List<(long start, long end)> currentRanges = new()
+            threads.Add(Task.Run(() =>
             {
-                (start, end)
-            };
+                long[] currendSeed = new long[end - start];
 
-            foreach (var key in mapRanges.Keys)
-            {
-                foreach (var (dest, src) in mapRanges[key])
+                for (long i = start; i < end; i++)
                 {
-                    int iterator = currentRanges.Count;
-                    for (int i = 0; i < iterator; i++)
-                    {
-                        if (currentRanges[i].end > src.end)
-                        {
-                            var newRangeStart = Math.Abs(src.end - currentRanges[i].end);
-                            currentRanges.Add((newRangeStart, currentRanges[i].end));
-                            iterator++;
-                            currentRanges[i] = (currentRanges[i].start, src.end);
-                        }
-
-                        if (currentRanges[i].start < src.start)
-                        {
-                            var newRangeEnd = Math.Abs(currentRanges[i].start - src.start);
-                            currentRanges.Add((currentRanges[i].start, newRangeEnd));
-                            iterator++;
-                            currentRanges[i] = (src.start, currentRanges[i].end);
-                        }
-
-                        var rangeOffset = Math.Abs(src.start - currentRanges[i].start);
-                        var mappedStartValue = dest.start + rangeOffset;
-
-                        rangeOffset = Math.Abs(src.start - currentRanges[i].end);
-                        var mappedEndValue = dest.start + rangeOffset;
-
-                        currentRanges[i] = (mappedStartValue, mappedEndValue);
-                    }
+                    currendSeed[i - start] = i;
                 }
-            }
 
-            var currentMin = currentRanges.Select(x => x.start < x.end ? x.start : x.end).Min();
-            min = currentMin < min ? currentMin : min;
+                long currenMin = CalculateMinSeedLocation(currendSeed);
+
+                lock (lockObject)
+                {
+                    if (min > currenMin)
+                        min = currenMin;
+                }
+            }));
         }
 
-        Console.WriteLine(min);
+        Console.WriteLine($"Running {threads.Count} threads, wait wile they finnish");
+        
+        Task.WhenAll(threads).Wait();
+
+        Console.WriteLine($"Min location: {min}");
     }
+
 
     private long CalculateMinSeedLocation(long[] currentSrc)
     {
