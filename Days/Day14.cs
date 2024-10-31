@@ -35,7 +35,7 @@ public class Day14 : ISolution
                 var closestObsticle = platform
                     .Select((cRow, index) => (cRow, index)).Where(x => x.index < rock.index && (x.cRow[column] == 'O' || x.cRow[column] == '#'))
                     .OrderBy(x => x.index)
-                    .DefaultIfEmpty((value: new[] { ' ' }, index: -1))
+                    .DefaultIfEmpty((new[] { ' ' }, index: -1))
                     .Last();
 
                 platform[rock.index][column] = '.';
@@ -119,7 +119,7 @@ public class Day14 : ISolution
                 var closestObsticle = platform
                     .Select((cRow, index) => (cRow, index)).Where(x => x.index < rock.index && (x.cRow[column] == 'O' || x.cRow[column] == '#'))
                     .OrderBy(x => x.index)
-                    .DefaultIfEmpty((value: new[] { ' ' }, index: -1))
+                    .DefaultIfEmpty((new[] { ' ' }, index: -1))
                     .Last();
 
                 platform[rock.index][column] = '.';
@@ -175,7 +175,7 @@ public class Day14 : ISolution
                 var closestObsticle = platform
                     .Select((cRow, index) => (cRow, index)).Where(x => x.index > rock.index && (x.cRow[column] == 'O' || x.cRow[column] == '#'))
                     .OrderBy(x => x.index)
-                    .DefaultIfEmpty((value: new[] { ' ' }, index: -1))
+                    .DefaultIfEmpty((new[] { ' ' }, index: -1))
                     .First();
 
                 platform[rock.index][column] = '.';
