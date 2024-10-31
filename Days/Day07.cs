@@ -48,19 +48,19 @@ internal class Day07 : ISolution
         => (inputLine[0].Select(ConvertCard).ToArray(), int.Parse(inputLine[1]));
 
     private int ConvertCard(char card)
-    => card switch
-    {
-        'A' => 14,
-        'K' => 13,
-        'Q' => 12,
-        'J' => 11,
-        'T' => 10,
-        _ => int.Parse(card.ToString())
-    };
+        => card switch
+        {
+            'A' => 14,
+            'K' => 13,
+            'Q' => 12,
+            'J' => 11,
+            'T' => 10,
+            _ => int.Parse(card.ToString())
+        };
 
     public void SolvePartOne()
     {
-        var handRanks = hands.Select(hand =>
+        var handRanks = hands.Select((hand, index) =>
         {
             var cardGroups = hand.hand
             .GroupBy(card => card)
@@ -68,42 +68,38 @@ internal class Day07 : ISolution
             .OrderByDescending(x => x)
             .Aggregate("", (a, b) => a + b);
 
-            int rank = 0;
-            groupRanks.TryGetValue(cardGroups, out rank);
+            var rank = groupRanks[cardGroups];
 
             return (rank, hand);
         })
         .GroupBy(hand => hand.rank)
-        .ToDictionary(hand => hand.Key, hand => hand.Select(x => x.hand).ToList());
+        .ToDictionary(hand => hand.Key, hand => hand.ToList());
 
         foreach (var item in handRanks)
         {
             item.Value.Sort(handComparer);
         }
 
-        int counter = 1;
-        int result = handRanks.Select(x => x.Key).OrderBy(x => x).Select(rank => handRanks[rank].Select(x => x.bid * counter++).Sum()).Sum();
+        var result = handRanks.OrderBy(x => x.Key)
+            .SelectMany(x => x.Value)
+            .Select((value, index) => value.hand.bid * (index + 1))
+            .Sum();
 
         Console.WriteLine(result);
     }
 
-    Comparison<(int[] hand, int bid)> handComparer = (a, b) =>
+    private readonly Comparison<(int rank,(int[] cards, int bid) hand)> handComparer = (a, b) =>
     {
-        for (int i = 0; i < a.hand.Length; i++)
+        for (int i = 0; i < a.hand.cards.Length; i++)
         {
-            if (a.hand[i] > b.hand[i])
+            if (a.hand.cards[i] > b.hand.cards[i])
                 return 1;
-            if (a.hand[i] < b.hand[i])
+            if (a.hand.cards[i] < b.hand.cards[i])
                 return -1;
         }
 
         return 0;
     };
-
-    private int OrderHand(int[] A, int[] B)
-    {
-        return 0;
-    }
 
     public void SolvePartTwo()
     {
