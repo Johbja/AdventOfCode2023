@@ -16,112 +16,81 @@ public class Day08 : ISolution
 {
     private readonly string[] _input;
     private readonly string _instructions;
-    private List<Node> _nodeList = new();
+
+    Dictionary<string, (string left, string rigth)> _positionLookup = new();
 
     public Day08(LoadInputService inputService)
     {
         _input = inputService.GetInputAsLines(nameof(Day08));
         _instructions = _input[0];
 
-
-
         foreach (var textNode in _input.Skip(2))
         {
-            var nodes = textNode.Select((node, index) => (node, index))
-                .Where(x => char.IsAsciiLetter(x.node))
-                .OrderBy(x => x.index)
-                .Select((x, i) => (firstIndex: x, secondIndex: i))
-                .GroupBy(x => x.firstIndex.index - x.secondIndex)
-                .ToDictionary(x => x.Key, x => x.ToList());
 
-            var nodeName = new string(nodes[0].Select(x => x.firstIndex.node).ToArray());
-            var nextLeftNode = new string(nodes[4].Select(x => x.firstIndex.node).ToArray());
-            var nextRightNode = new string(nodes[6].Select(x => x.firstIndex.node).ToArray());
-
-            var newNode = new Node(nodeName, nextLeftNode, nextRightNode);
-            _nodeList.Add(newNode);
+            var keyValues = textNode.Replace("(", "").Replace(")", "").Split("=", StringSplitOptions.RemoveEmptyEntries);
+            var values = keyValues[1].Split(",", StringSplitOptions.RemoveEmptyEntries);
+            _positionLookup.Add(keyValues[0].Replace(" ", ""), (values[0].Replace(" ", ""), values[1].Replace(" ","")));
         }
+    }
 
-        foreach (var node in _nodeList)
-        {
+    private int GDC(int valueA, int valueB)
+        => valueB == 0 ? valueA : GDC(valueB, valueA % valueB);
+    
 
-            var left = node.NextNodeLeftName;
-            var right = node.NextNodeRightName;
-
-            node.NextNodeLeft = _nodeList.Find(x => x.NodeName == left);
-            node.NextNodeRight = _nodeList.Find(x => x.NodeName == right);
-        }
-
+    private int LCM(int valueA, int valueB)
+    {
+        return valueA * valueB / GDC(valueA, valueB);
     }
 
     public void SolvePartOne()
     {
-        var currentNode = _nodeList.Find(x => x.NodeName == "AAA");
+        string currentPosition = "AAA";
+        int step = 0;
 
-        int stepCounter = 0;
-        while (currentNode.NodeName != "ZZZ")
+        while (currentPosition != "ZZZ")
         {
-            var currentInstuction = _instructions[stepCounter % _instructions.Length];
-
-            if(currentInstuction == 'L')
-            {
-                currentNode = currentNode.NextNodeLeft;
-            }
+            var currentInstuction = _instructions[step % _instructions.Length];
+            
+            if (currentInstuction == 'L')
+                currentPosition = _positionLookup[currentPosition].left;
             else
-            {
-                currentNode = currentNode.NextNodeRight;
-            }
+                currentPosition = _positionLookup[currentPosition].rigth;
 
-            stepCounter++;
+            step++;
         }
 
-        Console.WriteLine(stepCounter);
+        Console.WriteLine(step);
     }
 
     public void SolvePartTwo()
     {
+        var currentPositions = _positionLookup
+            .Where(entry => entry.Key.EndsWith('A'))
+            .Select(entry => (entry.Key, steps:0))
+            .ToArray();
 
-        var currentNodes = _nodeList.Where(x => x.NodeName[2] == 'A').ToArray();
-
-        int stepCounter = 0;
-        while (currentNodes.Any(x => x.NodeName[2] != 'Z'))
+        for (int i = 0; i < currentPositions.Length; i++)
         {
-            var currentInstuction = _instructions[stepCounter % _instructions.Length];
+            string currentPosition = currentPositions[i].Key;
+            int step = 0;
 
-
-            for(int i = 0; i < currentNodes.Length; i++)
+            while (!currentPosition.EndsWith('Z'))
             {
+                var currentInstuction = _instructions[step % _instructions.Length];
+
                 if (currentInstuction == 'L')
-                {
-                    currentNodes[i] = currentNodes[i].NextNodeLeft;
-                }
+                    currentPosition = _positionLookup[currentPosition].left;
                 else
-                {
-                    currentNodes[i] = currentNodes[i].NextNodeRight;
-                }
+                    currentPosition = _positionLookup[currentPosition].rigth;
+
+                step++;
             }
 
-            stepCounter++;
+            currentPositions[i] = (currentPositions[i].Key, step);
         }
 
-        Console.WriteLine(stepCounter);
-    }
-}
-
-public class Node
-{
-    public Node NextNodeLeft { get; set; }
-    public Node NextNodeRight { get; set; }
-
-    public string NodeName { get; private set; }
-    public string NextNodeLeftName { get; private set; }
-    public string NextNodeRightName { get; private set; }
-
-    public Node(string nodeName, string leftNodeName, string rightNodeName)
-    {
-        NodeName = nodeName;
-        NextNodeLeftName = leftNodeName;
-        NextNodeRightName = rightNodeName;
+        int result = currentPositions.Aggregate(1, (acc, steps) => LCM(acc, steps.steps));
+        Console.WriteLine(result);
     }
 }
 
